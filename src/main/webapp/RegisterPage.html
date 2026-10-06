@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Register</title>
+    <link rel="stylesheet" href="css/theme.css">
+</head>
+
+<body class="auth-page">
+
+<form class="auth-card" action="RegisterServlet" method="post">
+    <h2>Create Account</h2>
+
+    <div class="form-group">
+        <label>First Name</label>
+        <input name="fname" required>
+    </div>
+
+    <div class="form-group">
+        <label>Last Name</label>
+        <input name="lname" required>
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="userEmail" required>
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required>
+    </div>
+
+    <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" name="cnfPassword" required>
+    </div>
+
+    <div class="actions">
+        <button type="submit">Register</button>
+        <button type="reset">Reset</button>
+    </div>
+
+    <p>
+        Already have an account? <a href="LoginPage.html">Login</a>
+    </p>
+<p id="message" aria-live="polite"></p>
+</form>
+<script>
+const p = new URLSearchParams(location.search);
+const m = {validation:"Please check your details. Passwords must match and be at least 8 characters.",exists:"An account with this email already exists.",mail:"Verification email could not be sent.",expired:"Registration expired. Please start again.",account:"Account creation failed."};
+if (p.has("error")) document.getElementById("message").textContent = m[p.get("error")] || "Something went wrong.";
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Java / Eclipse build output
+build/
+bin/
+target/
+*.class
+
+# Tomcat generated files
+temp/
+work/
+
+# Logs
+*.log
+logs/
+
+# Secrets
+.env
+.env.*
+secrets.properties
+secrets*.properties
+**/secrets.properties
+
+# OS files
+.DS_Store
+Thumbs.db
