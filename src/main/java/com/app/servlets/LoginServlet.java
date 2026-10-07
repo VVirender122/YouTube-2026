@@ -52,7 +52,7 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("userName", user.getString("firstName"));
             session.setAttribute("userEmail", user.getString("email"));
 
-            response.sendRedirect(request.getContextPath() + "/Dashboard.jsp");
+            response.sendRedirect(request.getContextPath() + "/YTDashboard.jsp");
             return;
         }
 
