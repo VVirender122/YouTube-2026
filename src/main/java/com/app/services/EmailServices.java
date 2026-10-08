@@ -51,12 +51,22 @@ public final class EmailServices {
                 + "Regards,\nTeam B");
     }
 
-    public static boolean sendPasswordResetMail(String to, String userName, String otp) {
-        return send(to, "Password reset code",
+    public static boolean sendPasswordResetMail(String to, String userName, String resetLink) {
+        return send(to,
+                "Reset your YouTube-2026 password",
                 "Hello " + userName + ",\n\n"
-                + "Your password reset code is: " + otp + "\n\n"
-                + "This code expires in 5 minutes. If you did not request this, ignore this email.\n\n"
-                + "Regards,\nTeam B");
+                + "We received a request to reset your password.\n\n"
+                + "Click the link below to choose a new password:\n\n"
+                + resetLink + "\n\n"
+                + "This link expires in "
+                + com.app.helpers.PasswordResetTokenService
+                        .lifetimeMinutes()
+                + " minutes and can only be used once.\n\n"
+                + "If you did not request a password reset, "
+                + "you can safely ignore this email.\n\n"
+                + "Regards,\n"
+                + "Team B"
+        );
     }
 
     private static boolean send(String to, String subject, String body) {
