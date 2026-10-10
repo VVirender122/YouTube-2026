@@ -23,11 +23,17 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        logout(request, response);
+        // Logging out changes server-side state, so it must not be triggered by a GET link.
+        response.setHeader("Allow", "POST");
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Use POST to log out.");
     }
 
     private void logout(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
+
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();

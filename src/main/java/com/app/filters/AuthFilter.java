@@ -25,6 +25,12 @@ public class AuthFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        // Prevent browsers and intermediary caches from retaining authenticated pages
+        // after logout or when the user navigates back.
+        httpResponse.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        httpResponse.setHeader("Pragma", "no-cache");
+        httpResponse.setDateHeader("Expires", 0);
+
         String path = httpRequest.getServletPath();
         if (PUBLIC_JSP.contains(path)) {
             chain.doFilter(request, response);
