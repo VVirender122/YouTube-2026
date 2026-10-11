@@ -77,12 +77,16 @@
         for (VideoSchema video : videos) {
 %>
     <article class="video">
-        <a href="https://www.youtube.com/watch?v=<%= HtmlUtils.escape(video.getVideoID()) %>"
-           target="_blank" rel="noopener noreferrer">
+        <a class="video-open"
+           href="https://www.youtube.com/watch?v=<%= HtmlUtils.escape(video.getVideoID()) %>"
+           data-video-id="<%= HtmlUtils.escape(video.getVideoID()) %>"
+           data-video-title="<%= HtmlUtils.escape(video.getVideoName()) %>"
+           aria-label="Play <%= HtmlUtils.escape(video.getVideoName()) %> inside YouTube-2026">
             <img class="video-thumbnail"
                  src="<%= HtmlUtils.escape(video.getThumbnail()) %>"
-                 alt="<%= HtmlUtils.escape(video.getVideoName()) %>"
+                 alt=""
                  loading="lazy">
+            <span class="play-overlay" aria-hidden="true">▶</span>
         </a>
         <div class="video-info">
             <h3 title="<%= HtmlUtils.escape(video.getVideoName()) %>">
@@ -102,6 +106,76 @@
     }
 %>
 </main>
+
+<div class="player-modal" id="playerModal" hidden>
+    <div class="player-backdrop" data-player-close></div>
+    <section class="player-dialog" role="dialog" aria-modal="true"
+             aria-labelledby="playerTitle" tabindex="-1">
+        <div class="player-heading">
+            <h2 id="playerTitle">Now playing</h2>
+            <button type="button" class="player-close" id="playerClose" aria-label="Close video player">×</button>
+        </div>
+        <div class="player-frame-wrap">
+            <iframe id="videoPlayer" title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen></iframe>
+        </div>
+        <p class="player-fallback" id="playerFallback" hidden>
+            This video cannot be embedded. You can
+            <a id="openOnYouTube" href="#" target="_blank" rel="noopener noreferrer">open it on YouTube</a>.
+        </p>
+    </section>
+</div>
+
+<script>
+(() => {
+    const modal = document.getElementById('playerModal');
+    const dialog = modal.querySelector('.player-dialog');
+    const iframe = document.getElementById('videoPlayer');
+    const title = document.getElementById('playerTitle');
+    const closeButton = document.getElementById('playerClose');
+    const fallback = document.getElementById('playerFallback');
+    const fallbackLink = document.getElementById('openOnYouTube');
+    let previousFocus = null;
+
+    function closePlayer() {
+        modal.hidden = true;
+        iframe.src = 'about:blank';
+        fallback.hidden = true;
+        if (previousFocus) previousFocus.focus();
+    }
+
+    document.querySelectorAll('.video-open').forEach(link => {
+        link.addEventListener('click', event => {
+            const videoId = link.dataset.videoId || '';
+            // YouTube video IDs use 11 URL-safe characters. Leave the normal link
+            // behavior intact if an unexpected ID is returned by the API.
+            if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return;
+
+            event.preventDefault();
+            previousFocus = link;
+            title.textContent = link.dataset.videoTitle || 'Now playing';
+            fallbackLink.href = 'https://www.youtube.com/watch?v=' + videoId;
+            fallback.hidden = true;
+            iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1';
+            modal.hidden = false;
+            closeButton.focus();
+        });
+    });
+
+    closeButton.addEventListener('click', closePlayer);
+    modal.querySelectorAll('[data-player-close]').forEach(element => {
+        element.addEventListener('click', closePlayer);
+    });
+    document.addEventListener('keydown', event => {
+        if (!modal.hidden && event.key === 'Escape') closePlayer();
+    });
+
+    // Browsers do not expose a reliable cross-origin signal for blocked embeds;
+    // this link is also available to users if YouTube displays an embed error.
+})();
+</script>
 
 </body>
 </html>
