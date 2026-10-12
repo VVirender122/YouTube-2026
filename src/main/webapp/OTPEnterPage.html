@@ -25,9 +25,15 @@
 
 <script>
 const params = new URLSearchParams(location.search);
-if (params.has("error")) {
+if (params.get("error") === "invalid") {
+    const remaining = Number.parseInt(params.get("remaining"), 10);
     document.getElementById("message").textContent =
-        "The code is invalid or expired. Please start registration again.";
+        Number.isFinite(remaining) && remaining > 0
+            ? `The code is invalid or expired. ${remaining} attempt(s) remaining.`
+            : "The code is invalid or expired. Please start registration again.";
+} else if (params.get("error") === "locked") {
+    document.getElementById("message").textContent =
+        "Too many verification attempts. Please start registration again.";
 }
 </script>
 </body>

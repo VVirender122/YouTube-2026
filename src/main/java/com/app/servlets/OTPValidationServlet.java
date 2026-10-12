@@ -32,9 +32,25 @@ public class OTPValidationServlet extends HttpServlet {
 
         String expectedOtp = (String) session.getAttribute("registrationOtp");
         Long expiry = (Long) session.getAttribute("registrationOtpExpiry");
+        Integer attemptsValue = (Integer) session.getAttribute("registrationOtpAttempts");
+        int attempts = attemptsValue == null ? 0 : attemptsValue;
+
+        if (expectedOtp == null || attempts >= OtpService.maxAttempts()) {
+            clearPendingRegistration(session);
+            response.sendRedirect(request.getContextPath() + "/OTPEnterPage.html?error=locked");
+            return;
+        }
 
         if (!OtpService.isValid(expectedOtp, enteredOtp, expiry == null ? 0 : expiry)) {
-            response.sendRedirect(request.getContextPath() + "/OTPEnterPage.html?error=invalid");
+            attempts++;
+            if (attempts >= OtpService.maxAttempts()) {
+                clearPendingRegistration(session);
+                response.sendRedirect(request.getContextPath() + "/OTPEnterPage.html?error=locked");
+            } else {
+                session.setAttribute("registrationOtpAttempts", attempts);
+                response.sendRedirect(request.getContextPath() + "/OTPEnterPage.html?error=invalid&remaining="
+                        + (OtpService.maxAttempts() - attempts));
+            }
             return;
         }
 
@@ -47,8 +63,16 @@ public class OTPValidationServlet extends HttpServlet {
         session.removeAttribute("pendingUser");
         session.removeAttribute("registrationOtp");
         session.removeAttribute("registrationOtpExpiry");
+        session.removeAttribute("registrationOtpAttempts");
 
         response.sendRedirect(request.getContextPath() + "/LoginPage.html?registered=1");
+    }
+
+    private static void clearPendingRegistration(HttpSession session) {
+        session.removeAttribute("pendingUser");
+        session.removeAttribute("registrationOtp");
+        session.removeAttribute("registrationOtpExpiry");
+        session.removeAttribute("registrationOtpAttempts");
     }
 
     @Override

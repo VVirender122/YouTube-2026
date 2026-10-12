@@ -49,6 +49,7 @@ public class RegisterServlet extends HttpServlet {
                 firstName, lastName, email, PasswordHasher.hash(password)));
         session.setAttribute("registrationOtp", otp);
         session.setAttribute("registrationOtpExpiry", OtpService.expiryMillis());
+        session.setAttribute("registrationOtpAttempts", 0);
 
         if (!EmailServices.sendOTP(email, firstName, otp)) {
             session.removeAttribute("pendingUser");
